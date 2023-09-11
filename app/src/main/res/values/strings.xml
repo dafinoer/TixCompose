@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">TixCompose</string>
+    <string name="home_navbar_bottom">Home</string>
+    <string name="ticket_navbar_bottom">Ticket</string>
+    <string name="cinema_navbar_bottom">Cinema</string>
+    <string name="tooltip_home">Home</string>
+    <string name="tooltip_ticket">Ticket</string>
+    <string name="tooltip_cinema">Cinema</string>
+    <string name="find_in_tix">Find at TIX ID Compose</string>
+    <string name="tooltip_search">search</string>
+    <string name="tooltip_notification">notification</string>
+    <string name="image_slider">Info Slider</string>
+    <string name="tooltip_location_on">Change Location</string>
+    <string name="title_current_movie">Current Movie</string>
+    <string name="tooltip_button_all_movie">All Movies</string>
+    <string name="banner_image_home">banner cinema</string>
+    <string name="buy_ticket">Buy Ticket</string>
+    <string name="api_key_text_field">input Api Key</string>
+    <string name="clean_text">Clean text</string>
+    <string name="submit_api_key">Submit</string>
+    <string name="save_success">Save Success</string>
+    <string name="use_location_button">Use Location Button</string>
+    <string name="cinemas_location">Cinemas Location</string>
+    <string name="location_user_default">Jakarta</string>
+
+    <string name="error_empty_form">Please fill the Form</string>
+</resources>
