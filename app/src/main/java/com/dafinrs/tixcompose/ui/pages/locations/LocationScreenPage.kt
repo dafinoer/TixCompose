@@ -1,5 +1,8 @@
 package com.dafinrs.tixcompose.ui.pages.locations
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +18,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,20 +43,34 @@ fun LocationScreenPage(
     cinemaLocationViewModel: CinemaLocationViewModel = koinInject(
         parameters = {
             parametersOf(
-                get(
-                    clazz = GetListLocationCinema::class.java,
-                    parameters = {
-                        parametersOf(Dispatchers.IO)
-                    }
-                ),
+                get(clazz = GetListLocationCinema::class.java, parameters = {
+                    parametersOf(Dispatchers.IO)
+                }),
             )
         },
     ),
     onBackNavigation: () -> Unit,
 ) {
+    var isPermissionLocationGranted by remember { mutableStateOf<Boolean?>(null) }
+
+    val locationResult = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) {
+        isPermissionLocationGranted = it
+    }
     val locationsState = cinemaLocationViewModel.locationUiState.collectAsStateWithLifecycle(
         initialValue = CinemaLocationsState.Loading
     )
+
+    when (isPermissionLocationGranted) {
+        false -> {
+            AlertDialogPermission(onDismissRequest = { isPermissionLocationGranted = null }) {
+                isPermissionLocationGranted = null
+            }
+        }
+
+        else -> Unit
+    }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -78,7 +99,7 @@ fun LocationScreenPage(
 
                     item {
                         ComponentButtonLocation {
-
+                            locationResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
                         }
                     }
                 }
