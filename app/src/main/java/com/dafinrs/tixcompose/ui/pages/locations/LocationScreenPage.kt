@@ -1,8 +1,5 @@
 package com.dafinrs.tixcompose.ui.pages.locations
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,10 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,6 +27,7 @@ import com.dafinrs.tixcompose.domain.usecases.GetListLocationCinema
 import com.dafinrs.tixcompose.presentations.cinemalocation.CinemaLocationViewModel
 import com.dafinrs.tixcompose.presentations.cinemalocation.CinemaLocationsState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
@@ -51,26 +48,21 @@ fun LocationScreenPage(
     ),
     onBackNavigation: () -> Unit,
 ) {
-    var isPermissionLocationGranted by remember { mutableStateOf<Boolean?>(null) }
-
-    val locationResult = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) {
-        isPermissionLocationGranted = it
-    }
+    val coroutineScope = rememberCoroutineScope()
+    val rememberController = rememberLocationUser()
     val locationsState = cinemaLocationViewModel.locationUiState.collectAsStateWithLifecycle(
         initialValue = CinemaLocationsState.Loading
     )
-
-    when (isPermissionLocationGranted) {
-        false -> {
-            AlertDialogPermission(onDismissRequest = { isPermissionLocationGranted = null }) {
-                isPermissionLocationGranted = null
+    val isEnableButton = remember {
+        derivedStateOf {
+            when (rememberController.locationUserState.value) {
+                is LocationUserState.LoadingGetLocation -> false
+                else -> true
             }
         }
-
-        else -> Unit
     }
+
+    AlertGPSEnable(rememberController.locationUserState.value)
 
     Scaffold(topBar = {
         TopAppBar(
@@ -96,10 +88,13 @@ fun LocationScreenPage(
                         }
                     }
 
-
                     item {
-                        ComponentButtonLocation {
-                            locationResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        ComponentButtonLocation(isButtonEnable = isEnableButton.value) {
+                            if (it) {
+                                coroutineScope.launch {
+                                    rememberController.checkLocationSetting()
+                                }
+                            }
                         }
                     }
                 }
