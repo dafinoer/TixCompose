@@ -11,73 +11,56 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dafinrs.tixcompose.R
-import com.dafinrs.tixcompose.ui.components.AlertDialogPermission
-import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
 
 
 @Composable
 internal fun ComponentButtonLocation(
-    isButtonEnable: Boolean = true,
-
-    onPermissionLocationResult: (Boolean) -> Unit,
+    permissionState: PermissionLocationUserState,
+    onSearchLocation: () -> Unit,
 ) {
-    var isPermissionLocationGranted by remember { mutableStateOf<Boolean?>(null) }
-
+    var isShowDialog by remember { mutableStateOf(false) }
+    var isEnableButton by remember { mutableStateOf(true) }
     val locationResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) {
-        isPermissionLocationGranted = it
-        onPermissionLocationResult(it)
-    }
-
-    when (isPermissionLocationGranted) {
-        false -> {
-            AlertDialogPermission(
-                title = "Permission Location",
-                description = stringResource(id = R.string.permission_location_text),
-                onDismissRequest = { isPermissionLocationGranted = null }) {
-                isPermissionLocationGranted = null
-            }
+        isShowDialog = !it
+        if (it) {
+            onSearchLocation()
         }
-
-        else -> Unit
     }
+
+    LaunchedEffect(key1 = permissionState) {
+        isEnableButton = permissionState !is PermissionLocationUserState.LoadingGetLocation
+    }
+
+    AlertPermission(isShowDialog = isShowDialog, onDismiss = { isShowDialog = false })
 
     ElevatedButton(
         onClick = { locationResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface,
         ),
         modifier = Modifier
             .padding(vertical = 16.dp, horizontal = 16.dp)
             .fillMaxWidth(),
         contentPadding = PaddingValues(16.dp),
-        enabled = isButtonEnable
+        enabled = isEnableButton,
     ) {
         Text(
             text = stringResource(id = R.string.use_location_button),
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewButton() {
-    TixComposeTheme {
-        ComponentButtonLocation {
-
-        }
     }
 }

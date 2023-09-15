@@ -7,12 +7,10 @@ import com.dafinrs.tixcompose.domain.model.LocationModel
 import com.dafinrs.tixcompose.domain.usecases.GetListLocationCinema
 import com.dafinrs.tixcompose.domain.usecases.GetLocationUser
 import com.dafinrs.tixcompose.domain.usecases.SaveLocationUser
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.annotation.InjectedParam
@@ -20,13 +18,9 @@ import org.koin.core.annotation.InjectedParam
 @KoinViewModel
 class CinemaLocationViewModel(
     @InjectedParam private val getListLocationCinema: GetListLocationCinema,
-    private val getLocationUser: GetLocationUser,
+    getLocationUser: GetLocationUser,
     private val saveLocationUser: SaveLocationUser,
 ) : ViewModel() {
-
-    private val mutableLocationUser = MutableStateFlow<LocationModel?>(value = null)
-    val locationUserState = mutableLocationUser.asStateFlow()
-
     val locationUiState = flow {
         emit(CinemaLocationsState.Loading)
         val locations = getListLocationCinema.getLocations()
@@ -34,21 +28,19 @@ class CinemaLocationViewModel(
     }.catch {
         Log.e("LOCATION_LIST", it.message, it)
         emit(CinemaLocationsState.Error)
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        initialValue = CinemaLocationsState.Loading,
+        started = SharingStarted.WhileSubscribed(5000)
+    )
 
-    init {
-        viewModelScope.launch {
-            getLocationUser.readLocation().catch {
-                Log.e("CinemaLocationViewModel", it.message ?: "", it)
-            }.shareIn(
-                viewModelScope, replay = 1, started = SharingStarted.WhileSubscribed(5_000)
-            ).collect {
-                if (it.name.isNotEmpty()) {
-                    mutableLocationUser.value = it
-                }
-            }
-        }
-    }
+    val getLocationUserFlow = getLocationUser.readLocation().catch {
+        Log.e("CinemaLocationViewModel", it.message ?: "", it)
+    }.stateIn(
+        viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null
+    )
 
     fun saveLocation(locationModel: LocationModel) {
         viewModelScope.launch {
