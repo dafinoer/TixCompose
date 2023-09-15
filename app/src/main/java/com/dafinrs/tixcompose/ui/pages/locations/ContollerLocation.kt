@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.dafinrs.tixcompose.domain.model.LocationModel
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -28,28 +29,28 @@ import kotlin.coroutines.resume
 
 
 @Composable
-fun rememberLocationUser(dispatcher: CoroutineDispatcher = Dispatchers.IO): ControllerLocation {
+fun rememberLocationUser(dispatcher: CoroutineDispatcher = Dispatchers.IO): PermissionLocationHolder {
     val currentContext = LocalContext.current
 
-    return remember { ControllerLocation(currentContext, dispatcher) }
+    return remember { PermissionLocationHolder(currentContext, dispatcher) }
 }
 
-sealed class LocationUserState {
-    object Initial : LocationUserState()
+sealed class PermissionLocationUserState {
+    object Initial : PermissionLocationUserState()
 
-    object LoadingGetLocation : LocationUserState()
+    object LoadingGetLocation : PermissionLocationUserState()
 
-    data class Success(val locationList: List<String>) : LocationUserState()
+    data class Success(val location: LocationModel?) : PermissionLocationUserState()
 
-    object DisableGPS : LocationUserState()
-    object Failure : LocationUserState()
+    object DisableGPS : PermissionLocationUserState()
+    object Failure : PermissionLocationUserState()
 }
 
-class ControllerLocation(
-    private val context: Context,
-    private val dispatcher: CoroutineDispatcher,
+class PermissionLocationHolder(
+    private val context: Context, private val dispatcher: CoroutineDispatcher
 ) {
-    val locationUserState = mutableStateOf<LocationUserState>(LocationUserState.Initial)
+    val permissionState =
+        mutableStateOf<PermissionLocationUserState>(PermissionLocationUserState.Initial)
     private val geoCoding = Geocoder(context)
     private val fusedLocation = LocationServices.getFusedLocationProviderClient(context)
     private val locationSettingBuilder = LocationSettingsRequest.Builder()
@@ -57,30 +58,51 @@ class ControllerLocation(
         setPriority(Priority.PRIORITY_LOW_POWER)
     }.build()
 
+    suspend fun findLocationFromDeviceLocation(
+        cinemaLocations: List<LocationModel>
+    ) {
+        try {
+            permissionState.value = PermissionLocationUserState.LoadingGetLocation
+            val locations = findLocation()
+            var locationModel: LocationModel? = null
+            if (cinemaLocations.isNotEmpty() || locations.isNotEmpty()) {
+                withContext(dispatcher) {
+                    for (location in locations) {
+                        if (locationModel != null) break
+                        for (cinemaLocation in cinemaLocations) {
+                            if (location.contains(cinemaLocation.name)) {
+                                locationModel = cinemaLocation
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            permissionState.value = PermissionLocationUserState.Success(locationModel)
+        } catch (resolveError: ResolvableApiException) {
+            permissionState.value = PermissionLocationUserState.DisableGPS
+        } catch (error: Exception) {
+            permissionState.value = PermissionLocationUserState.Failure
+        }
+    }
+
     @SuppressLint("MissingPermission")
-    suspend fun checkLocationSetting() {
+    suspend fun findLocation(): List<String> {
         val locationRequestBuild = locationSettingBuilder.apply {
             addLocationRequest(locationRequest)
         }.build()
-        try {
-            locationUserState.value = LocationUserState.LoadingGetLocation
-            when (isPermissionGrant()) {
-                true -> {
-                    val isLocationEnable = isLocationUsable(locationRequestBuild)
-                    if (isLocationEnable) {
-                        val location = getCurrentLocation()
-                        locationUserState.value = LocationUserState.Success(location)
-                        return
-                    }
+        when (isPermissionGrant()) {
+            true -> {
+                val isLocationEnable = isLocationUsable(locationRequestBuild)
+                if (isLocationEnable) {
+                    return getCurrentLocation()
                 }
-                else -> Unit
             }
-            locationUserState.value = LocationUserState.Success(emptyList())
-        } catch (resolveError: ResolvableApiException) {
-            locationUserState.value = LocationUserState.DisableGPS
-        } catch (error: Exception) {
-            locationUserState.value = LocationUserState.Failure
+
+            else -> Unit
         }
+
+        return emptyList()
     }
 
     private fun isPermissionGrant(): Boolean {
@@ -122,7 +144,7 @@ class ControllerLocation(
             }
         }
     }
-    
+
     private fun locationNameOldApi(lat: Double, lon: Double): List<String> {
         val result = geoCoding.getFromLocation(lat, lon, 5)
         if (result?.isNotEmpty() == true) {
