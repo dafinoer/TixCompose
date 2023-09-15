@@ -12,12 +12,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -48,23 +53,36 @@ fun LocationScreenPage(
     ),
     onBackNavigation: () -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showDialogEnableGPS by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val rememberController = rememberLocationUser()
     val locationsState = cinemaLocationViewModel.locationUiState.collectAsStateWithLifecycle(
         initialValue = CinemaLocationsState.Loading
     )
-    val isEnableButton = remember {
-        derivedStateOf {
-            when (rememberController.locationUserState.value) {
-                is LocationUserState.LoadingGetLocation -> false
-                else -> true
+    val snackbarMessageNoLocationData = stringResource(id = R.string.snackbar_error_nodata_location)
+
+    LaunchedEffect(rememberController.permissionState.value) {
+        when (val state = rememberController.permissionState.value) {
+            is PermissionLocationUserState.Success -> {
+                if (state.location != null) {
+                    cinemaLocationViewModel.saveLocation(state.location)
+                    onBackNavigation()
+                } else {
+                    snackbarHostState.showSnackbar(snackbarMessageNoLocationData)
+                }
             }
+
+            is PermissionLocationUserState.DisableGPS -> showDialogEnableGPS = true
+            else -> Unit
         }
     }
 
-    AlertGPSEnable(rememberController.locationUserState.value)
+    AlertDialogLocation(showDialogEnableGPS) { showDialogEnableGPS = false }
 
-    Scaffold(topBar = {
+    Scaffold(snackbarHost = {
+        SnackbarHost(snackbarHostState)
+    }, topBar = {
         TopAppBar(
             navigationIcon = {
                 IconButton(onClick = onBackNavigation) {
@@ -89,11 +107,9 @@ fun LocationScreenPage(
                     }
 
                     item {
-                        ComponentButtonLocation(isButtonEnable = isEnableButton.value) {
-                            if (it) {
-                                coroutineScope.launch {
-                                    rememberController.checkLocationSetting()
-                                }
+                        ComponentButtonLocation(rememberController.permissionState.value) {
+                            coroutineScope.launch {
+                                rememberController.findLocationFromDeviceLocation(state.locations)
                             }
                         }
                     }
