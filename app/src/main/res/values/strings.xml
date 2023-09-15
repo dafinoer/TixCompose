@@ -23,6 +23,6 @@
     <string name="cinemas_location">Cinemas Location</string>
     <string name="location_user_default">Jakarta</string>
     <string name="permission_location_text">For activate user location, you need to enable location permission</string>
-
+    <string name="snackbar_error_nodata_location">No Location Data</string>
     <string name="error_empty_form">Please fill the Form</string>
 </resources>
