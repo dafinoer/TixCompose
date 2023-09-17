@@ -1,7 +1,5 @@
 package com.dafinrs.tixcompose.ui.pages.base
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -16,6 +14,7 @@ import com.dafinrs.tixcompose.presentations.cinemalocation.CinemaLocationViewMod
 import com.dafinrs.tixcompose.presentations.nowplaying.NowPlayingViewModel
 import com.dafinrs.tixcompose.ui.pages.base.components.bottomnav.BottomNavBasePage
 import com.dafinrs.tixcompose.ui.pages.cinema.CinemaScreenPage
+import com.dafinrs.tixcompose.ui.pages.home.HomeAppBar
 import com.dafinrs.tixcompose.ui.pages.home.HomeScreenPage
 import com.dafinrs.tixcompose.ui.pages.ticket.TicketScreenPage
 import kotlinx.coroutines.Dispatchers
@@ -52,26 +51,24 @@ fun BaseScreenPage(
 ) {
     val rememberNavigationBarController = rememberNavController()
     Scaffold(
+        topBar = {
+            HomeAppBar(
+                onClickSearchBar = onSearchBar,
+                onClickProfile = onGoToProfile,
+                onClickNotification = onGoToNotification,
+            )
+        },
         bottomBar = {
             BottomNavBasePage(rememberNavigationBarController)
         },
     ) {
         NavHost(navController = rememberNavigationBarController,
             startDestination = "home",
-            modifier = Modifier.padding(it),
-            enterTransition = {
-                EnterTransition.None
-            },
-            exitTransition = {
-                ExitTransition.None
-            }) {
+            modifier = Modifier.padding(it)) {
             composable(
                 "home"
             ) {
                 HomeScreenPage(
-                    onSearchBar = onSearchBar,
-                    onGoToProfile = onGoToProfile,
-                    onGoToNotification = onGoToNotification,
                     nowPlayingViewModel = nowPlayingViewModel,
                     cinemaLocationViewModel = locationViewModel,
                     onClickLocation = onTapLocation,
