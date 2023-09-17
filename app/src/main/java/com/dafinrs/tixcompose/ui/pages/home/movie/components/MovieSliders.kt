@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -37,9 +38,8 @@ import kotlinx.coroutines.Dispatchers
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MovieSlider(
-    modifier: Modifier = Modifier,
-    movies: List<MovieModel> = listOf(),
-    screenWidthSize: Int,
+    movies: List<MovieModel>,
+    paddingSize: () -> Double,
     onChangeMovie: (MovieModel) -> Unit,
     onTapBuyButton: (MovieModel) -> Unit,
 ) {
@@ -61,17 +61,21 @@ fun MovieSlider(
     HorizontalPager(
         state = pagerState,
         contentPadding = PaddingValues(
-            start = (screenWidthSize * 0.25).dp,
-            end = (screenWidthSize * 0.25).dp,
+            start = paddingSize().dp,
+            end = paddingSize().dp,
         ),
         pageSize = PageSize.Fill,
         pageSpacing = 16.dp,
-        modifier = modifier,
+        modifier = Modifier.padding(vertical = 16.dp),
     ) {
         val pageIndex = Math.floorMod(it, movies.size)
         val isShow = indexButtonShow == pageIndex
 
-        ImageItem(movieModel = movies[pageIndex], isShowButtonBuyTicket = isShow, onTapBuyButton = onTapBuyButton)
+        ImageItem(
+            movieModel = movies[pageIndex],
+            isShowButtonBuyTicket = isShow,
+            onTapBuyButton = onTapBuyButton
+        )
     }
 }
 
