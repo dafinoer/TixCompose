@@ -31,9 +31,6 @@ import com.dafinrs.tixcompose.ui.pages.home.slider.SliderHomeApp
 fun HomeScreenPage(
     nowPlayingViewModel: NowPlayingViewModel,
     cinemaLocationViewModel: CinemaLocationViewModel,
-    onSearchBar: () -> Unit,
-    onGoToProfile: () -> Unit,
-    onGoToNotification: () -> Unit,
     onClickLocation: () -> Unit,
     onMoreMovie: () -> Unit,
     onDetail: (String) -> Unit,
@@ -51,15 +48,7 @@ fun HomeScreenPage(
         }
     }
 
-    Scaffold(
-        topBar = {
-            HomeAppBar(
-                onClickSearchBar = onSearchBar,
-                onClickProfile = onGoToProfile,
-                onClickNotification = onGoToNotification,
-            )
-        },
-    ) {
+    Scaffold {
         LazyColumn(modifier = Modifier.padding(it)) {
             item {
                 LocationCinema(
