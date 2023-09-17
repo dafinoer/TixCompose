@@ -1,7 +1,6 @@
 package com.dafinrs.tixcompose.ui.pages.home.previews
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -41,7 +40,9 @@ fun MoviePreviewSlider() {
             ) {
                 MovieSlider(
                     movies = items,
-                    screenWidthSize = screenWidth,
+                    paddingSize = {
+                        screenWidth * 0.25
+                    },
                     onChangeMovie = {
 
                     }
