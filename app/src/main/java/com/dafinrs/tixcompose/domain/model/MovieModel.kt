@@ -10,6 +10,6 @@ data class MovieModel(
     val desc: String? = null,
     val votes: Double = 0.0,
     val backdropPath: String? = null,
-    val cinemaList: Set<CinemasModel> = emptySet(),
+    val cinemaList: Map<String, CinemasModel> = emptyMap(),
     val postPath: String? = null,
 )

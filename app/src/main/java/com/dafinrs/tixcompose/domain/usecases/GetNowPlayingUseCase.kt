@@ -10,7 +10,12 @@ class GetNowPlayingUseCase(
 
     override suspend fun call(arg: Int): List<MovieModel> {
         val movies = movieRepository.getNowPlaying(arg)
+        return movies.map { it.copy(cinemaList = cinemasRepository.cinemaList()) }
+    }
 
-        return cinemasRepository.addCinemaLocationToMovies(movies)
+    suspend fun filterMovieByType(filterType: String, pageIndex: Int): List<MovieModel> {
+        val movies = movieRepository.getNowPlaying(pageIndex)
+            .map { it.copy(cinemaList = cinemasRepository.cinemaList()) }
+        return movies.filter { it.cinemaList.containsKey(filterType) }
     }
 }
