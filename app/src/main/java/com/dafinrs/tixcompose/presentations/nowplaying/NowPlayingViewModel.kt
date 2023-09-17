@@ -1,15 +1,11 @@
 package com.dafinrs.tixcompose.presentations.nowplaying
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dafinrs.tixcompose.domain.usecases.GetNowPlayingUseCase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.annotation.InjectedParam
 
@@ -17,29 +13,31 @@ import org.koin.core.annotation.InjectedParam
 @KoinViewModel
 class NowPlayingViewModel(@InjectedParam private val nowPlayingUseCase: GetNowPlayingUseCase) :
     ViewModel() {
-
-    private val nowPlayingPage = MutableStateFlow(1)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val nowPlayingUiState = nowPlayingPage.flatMapLatest { value ->
-        flow {
-            emit(NowPlayingState.Loading)
-            val result = nowPlayingUseCase.call(value)
-            emit(NowPlayingState.Success(result))
-        }
-    }.catch {
-        emit(NowPlayingState.Error())
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = NowPlayingState.Loading
-    )
-
-    init {
-        onCallNowPlayingPage(1)
-    }
+    private val nowPlayingState = MutableStateFlow<NowPlayingState>(NowPlayingState.Initial)
+    val nowPlayingUIState = nowPlayingState
 
     fun onCallNowPlayingPage(page: Int) {
-        nowPlayingPage.value = page
+        viewModelScope.launch {
+            try {
+                nowPlayingState.value = NowPlayingState.Loading
+                val result = nowPlayingUseCase.call(page)
+                nowPlayingState.value = NowPlayingState.Success(result)
+            } catch (error: Exception) {
+                nowPlayingState.value = NowPlayingState.Error()
+                Log.e("NowPlaying", error.message ?: "", error.cause)
+            }
+        }
+    }
+
+    fun getPlayNowMovieWithFilter(filterType: String, page: Int = 1) {
+        viewModelScope.launch {
+            try {
+                nowPlayingState.value = NowPlayingState.Loading
+                val result = nowPlayingUseCase.filterMovieByType(filterType, page)
+                nowPlayingState.value = NowPlayingState.Success(result)
+            } catch (error: Exception) {
+                nowPlayingState.value = NowPlayingState.Error()
+            }
+        }
     }
 }
