@@ -3,7 +3,6 @@ package com.dafinrs.tixcompose.ui.pages.home.movie.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absolutePadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.dafinrs.tixcompose.domain.model.CinemasModel
 
 @Composable
-fun CinemasList(cinemas: Set<CinemasModel> = emptySet()) {
+fun CinemasList(cinemas:  List<CinemasModel> = emptyList()) {
     if (cinemas.isNotEmpty()) {
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(bottom = 16.dp).fillMaxWidth()) {
             cinemas.forEach {
