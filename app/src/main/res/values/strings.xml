@@ -25,4 +25,6 @@
     <string name="permission_location_text">For activate user location, you need to enable location permission</string>
     <string name="snackbar_error_nodata_location">No Location Data</string>
     <string name="error_empty_form">Please fill the Form</string>
+    <string name="tab_active_ticket">Active Ticket</string>
+    <string name="tab_list_transaction">List Transaction</string>
 </resources>
