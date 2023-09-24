@@ -1,9 +1,9 @@
 package com.dafinrs.tixcompose.data.models.remote
 
 import com.dafinrs.tixcompose.domain.model.MovieModel
+import com.dafinrs.tixcompose.utilities.parseToZoneDateTime
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.time.LocalDate
 
 @JsonClass(generateAdapter = true)
 data class MovieRemoteModel(
@@ -22,7 +22,7 @@ data class MovieRemoteModel(
         desc = desc,
         postPath = posterPath,
         backdropPath = backdropPath,
-        releaseDate = LocalDate.parse(releaseDate),
+        releaseDate = releaseDate.parseToZoneDateTime(),
         voteCount = voteCount,
         votes = voteAverage
     )
