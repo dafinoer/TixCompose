@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dafinrs.tixcompose.domain.model.MovieModel
 import com.dafinrs.tixcompose.ui.pages.home.movie.MovieSlider
 import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
-import java.time.LocalDate
+import java.time.ZonedDateTime
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,7 +22,7 @@ fun MoviePreviewSlider() {
     val itemModelDummy = MovieModel(
         0,
         "https://cdn.pixabay.com/photo/2023/06/20/10/06/cocktail-8076619_1280.jpg",
-        releaseDate = LocalDate.now()
+        releaseDate = ZonedDateTime.now()
     )
     val items = mutableListOf<MovieModel>()
     for (index in 0..5) {

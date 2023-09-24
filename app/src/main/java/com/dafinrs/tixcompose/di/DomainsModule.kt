@@ -3,10 +3,13 @@ package com.dafinrs.tixcompose.di
 import com.dafinrs.tixcompose.data.repository.CinemasRepository
 import com.dafinrs.tixcompose.data.repository.MovieRepository
 import com.dafinrs.tixcompose.data.repository.SettingRepository
+import com.dafinrs.tixcompose.data.repository.TicketRepository
 import com.dafinrs.tixcompose.domain.usecases.GetApiToken
 import com.dafinrs.tixcompose.domain.usecases.GetListLocationCinema
 import com.dafinrs.tixcompose.domain.usecases.GetLocationUser
 import com.dafinrs.tixcompose.domain.usecases.GetNowPlayingUseCase
+import com.dafinrs.tixcompose.domain.usecases.GetTicketActiveUseCase
+import com.dafinrs.tixcompose.domain.usecases.GetTicketSoldUseCase
 import com.dafinrs.tixcompose.domain.usecases.SaveApiKey
 import com.dafinrs.tixcompose.domain.usecases.SaveLocationUser
 import kotlinx.coroutines.CoroutineDispatcher
@@ -94,9 +97,19 @@ class DomainsModule {
         get(
             clazz = CinemasRepository::class.java,
             parameters = {
-                parametersOf(get(clazz = CoroutineDispatcher::class.java,
-                    parameters = { parametersOf(Dispatchers.IO) }))
+                parametersOf(
+                    get(clazz = CoroutineDispatcher::class.java,
+                        parameters = { parametersOf(Dispatchers.IO) })
+                )
             },
         )
     )
+
+    @Factory
+    fun getObserverTicketSold(ticketRepository: TicketRepository) =
+        GetTicketSoldUseCase(ticketRepository)
+
+    @Factory
+    fun getActiveTicketUseCase(ticketRepository: TicketRepository) =
+        GetTicketActiveUseCase(ticketRepository)
 }

@@ -83,7 +83,9 @@ fun BaseScreenPage(
                 CinemaScreenPage()
             }
             composable("ticket") {
-                TicketScreenPage()
+                TicketScreenPage {
+
+                }
             }
         }
     }
