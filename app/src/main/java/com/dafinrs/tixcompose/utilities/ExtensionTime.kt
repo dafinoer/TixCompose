@@ -20,11 +20,6 @@ fun ZonedDateTime.simpleDate(): String {
     return simpleDateFormat.format(localDate)
 }
 
-fun ZonedDateTime.fullDate(): String {
-    val fullDateTimeFormat = DateTimeFormatter.ISO_ZONED_DATE_TIME
-    return fullDateTimeFormat.format(this)
-}
-
 fun String.parseToZoneDateTime(): ZonedDateTime {
     val localDate = LocalDate.parse(this, DateTimeFormatter.ISO_DATE)
     return localDate.atStartOfDay(ZoneOffset.systemDefault())
