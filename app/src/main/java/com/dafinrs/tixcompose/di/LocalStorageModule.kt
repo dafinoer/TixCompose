@@ -2,12 +2,13 @@ package com.dafinrs.tixcompose.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
+import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.dafinrs.tixcompose.LocationUserMessage
+import com.dafinrs.tixcompose.data.AppDatabase
 import com.dafinrs.tixcompose.data.models.locals.LocationUserSerializer
+import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.koin.core.annotation.Singleton
@@ -31,4 +32,14 @@ class LocalStorageModule {
         dataStore("location_user.pb", serializer = LocationUserSerializer).getValue(
             appContext, LocationUserSerializer::defaultValue
         )
+
+    @Single(createdAtStart = true)
+    fun createRoomDataBase(applicationContext: Context) =
+        Room.databaseBuilder(applicationContext, AppDatabase::class.java, "database-movie").build()
+
+    @Factory
+    fun createTicketDao(appDatabase: AppDatabase) = appDatabase.ticketDao()
+
+    @Factory
+    fun createMovieDao(appDatabase: AppDatabase) = appDatabase.movieDao()
 }
