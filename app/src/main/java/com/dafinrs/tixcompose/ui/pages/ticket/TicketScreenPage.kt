@@ -17,8 +17,7 @@ import com.dafinrs.tixcompose.presentations.ticket.TicketSoldViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketScreenPage(
     ticketSoldViewModel: TicketSoldViewModel = koinViewModel(),
