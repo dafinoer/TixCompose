@@ -42,8 +42,6 @@ internal fun ComponentButtonLocation(
         isEnableButton = permissionState !is PermissionLocationUserState.LoadingGetLocation
     }
 
-    AlertPermission(isShowDialog = isShowDialog, onDismiss = { isShowDialog = false })
-
     ElevatedButton(
         onClick = { locationResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
         colors = ButtonDefaults.buttonColors(
