@@ -1,26 +1,21 @@
 package com.dafinrs.tixcompose.data.remote
 
 
-import android.content.Context
 import com.dafinrs.tixcompose.data.models.remote.LocationRemoteModel
 import com.dafinrs.tixcompose.domain.model.CinemasModel
+import com.dafinrs.tixcompose.utilities.CinemaLocationFile
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Factory
 
 @Factory
-class CinemaLocationService(private val moshi: Moshi, private val context: Context) {
+class CinemaLocationService(private val moshi: Moshi, private val cinemaLocationFile: CinemaLocationFile) {
 
     @OptIn(ExperimentalStdlibApi::class)
     suspend fun getCinemaLocation(dispatcher: CoroutineDispatcher = Dispatchers.IO): List<LocationRemoteModel> {
-        val file = withContext(dispatcher) {
-            context.resources.assets.open("cinemas_location.json").bufferedReader().use {
-                it.readText()
-            }
-        }
+        val file = cinemaLocationFile.readCinemaLocationFile(dispatcher)
         val adapter = moshi.adapter<List<LocationRemoteModel>>()
         val results = adapter.fromJson(file)
 
