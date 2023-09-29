@@ -27,4 +27,8 @@
     <string name="error_empty_form">Please fill the Form</string>
     <string name="tab_active_ticket">Active Ticket</string>
     <string name="tab_list_transaction">List Transaction</string>
+    <string name="button_buy_now">Buy Now</string>
+    <string name="genre_textbody">Genre</string>
+    <string name="director">Director</string>
+    <string name="age_rating">Age Rating</string>
 </resources>

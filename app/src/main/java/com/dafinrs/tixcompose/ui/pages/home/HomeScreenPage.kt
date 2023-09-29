@@ -33,7 +33,7 @@ fun HomeScreenPage(
     cinemaLocationViewModel: CinemaLocationViewModel,
     onClickLocation: () -> Unit,
     onMoreMovie: () -> Unit,
-    onDetail: (String) -> Unit,
+    onDetail: (Int) -> Unit,
 ) {
     val nowPlayingMovieState = nowPlayingViewModel.nowPlayingUIState.collectAsStateWithLifecycle()
     val cinemaLocationState =
@@ -79,13 +79,16 @@ fun HomeScreenPage(
                         MovieContent(
                             moviesItem = state.items,
                             useChoiceCinema = userChoiceCinema,
-                        ) { cinemaType ->
-                            userChoiceCinema = cinemaType
-                            if (cinemaType != null) {
-                                nowPlayingViewModel.getPlayNowMovieWithFilter(cinemaType)
-                            } else {
-                                nowPlayingViewModel.onCallNowPlayingPage(1)
-                            }
+                            onChangeCinema = { cinemaType ->
+                                userChoiceCinema = cinemaType
+                                if (cinemaType != null) {
+                                    nowPlayingViewModel.getPlayNowMovieWithFilter(cinemaType)
+                                } else {
+                                    nowPlayingViewModel.onCallNowPlayingPage(1)
+                                }
+                            },
+                        ) {
+                            onDetail(it)
                         }
                     }
 

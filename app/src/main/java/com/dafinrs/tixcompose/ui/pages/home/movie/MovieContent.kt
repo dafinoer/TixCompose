@@ -16,7 +16,8 @@ import com.dafinrs.tixcompose.ui.pages.home.movie.components.MovieTitle
 fun MovieContent(
     moviesItem: List<MovieModel>,
     useChoiceCinema: String? = null,
-    onChangeCinema: (String?) -> Unit
+    onChangeCinema: (String?) -> Unit,
+    onDetailMovie: (Int) -> Unit,
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val movieNow = remember { mutableStateOf<MovieModel?>(null) }
@@ -25,8 +26,10 @@ fun MovieContent(
         MovieRowButtonCinema(useChoiceCinema, onTapButton = onChangeCinema)
         MovieSlider(moviesItem, paddingSize = { screenWidth * 0.25 }, onChangeMovie = {
             movieNow.value = it
-        }) {
+        }, onTapBuyButton = {
             Log.i("MOVIE NOW", it.title)
+        }) {
+            onDetailMovie(it)
         }
         MovieTitle(movieNow.value?.title)
         CinemasList(movieNow.value?.cinemaList?.values?.toList() ?: emptyList())

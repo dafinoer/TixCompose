@@ -47,7 +47,7 @@ fun BaseScreenPage(
     onGoToProfile: () -> Unit,
     onGoToNotification: () -> Unit,
     onTapLocation: () -> Unit,
-    onTapDetailCard: (String) -> Unit,
+    onTapDetailCard: (Int) -> Unit,
 ) {
     val rememberNavigationBarController = rememberNavController()
     Scaffold(
