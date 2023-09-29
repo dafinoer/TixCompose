@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dafinrs.tixcompose.domain.usecases.GetApiToken
 import com.dafinrs.tixcompose.ui.pages.apikey.ApiKeyScreenPage
 import com.dafinrs.tixcompose.ui.pages.base.BaseScreenPage
+import com.dafinrs.tixcompose.ui.pages.detail.DetailScreenPage
 import com.dafinrs.tixcompose.ui.pages.locations.LocationScreenPage
 import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
 import com.dafinrs.tixcompose.utilities.NavigationPageKey
@@ -39,11 +40,17 @@ class MainActivity : ComponentActivity() {
                             onTapLocation = {
                                 navController.navigate(NavigationPageKey.LOCATION_CHOICE_KEY_PAGE)
                             }) {
-
+                            navController.navigate(NavigationPageKey.DETAIL_MOVIE)
                         }
                     }
                     composable(NavigationPageKey.LOCATION_CHOICE_KEY_PAGE) {
                         LocationScreenPage {
+                            navController.popBackStack()
+                        }
+                    }
+
+                    composable(NavigationPageKey.DETAIL_MOVIE) {
+                        DetailScreenPage {
                             navController.popBackStack()
                         }
                     }
