@@ -1,8 +1,8 @@
 package com.dafinrs.tixcompose.ui.pages.home.movie
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +42,7 @@ fun MovieSlider(
     paddingSize: () -> Double,
     onChangeMovie: (MovieModel) -> Unit,
     onTapBuyButton: (MovieModel) -> Unit,
+    onTapDetailMovie: (Int) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = {
         Int.MAX_VALUE
@@ -74,7 +75,8 @@ fun MovieSlider(
         ImageItem(
             movieModel = movies[pageIndex],
             isShowButtonBuyTicket = isShow,
-            onTapBuyButton = onTapBuyButton
+            onTapBuyButton = onTapBuyButton,
+            onTapDetailMovie = onTapDetailMovie
         )
     }
 }
@@ -84,9 +86,11 @@ private fun ImageItem(
     modifier: Modifier = Modifier, movieModel: MovieModel,
     isShowButtonBuyTicket: Boolean = false,
     onTapBuyButton: (MovieModel) -> Unit,
+    onTapDetailMovie: (Int) -> Unit,
 ) {
     Surface(
         modifier = modifier
+            .clickable { onTapDetailMovie(movieModel.id) }
             .fillMaxWidth()
             .height(392.dp),
         shape = RoundedCornerShape(12.dp),
