@@ -25,14 +25,14 @@ import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
 
 @Composable
 fun PosterImageComponent(
-    imageUrl: String, modifier: Modifier = Modifier,
+    imageUrl: String?, modifier: Modifier = Modifier,
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current).data(imageUrl).crossfade(true)
             .size(Size(300, Dimension.Undefined)).build(),
         placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
         contentDescription = "Image",
-        contentScale = ContentScale.Fit,
+        contentScale = ContentScale.Crop,
         modifier = modifier
             .width(90.dp)
             .height(150.dp)

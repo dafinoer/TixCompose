@@ -18,4 +18,12 @@ class MovieRepositoryImpl(
         withContext(coroutineDispatcher) {
             movieService.getNowPlaying(page)
         }
+
+    override suspend fun getDetail(movieId: Int): MovieModel? {
+        val result = withContext(coroutineDispatcher) {
+            movieService.getDetail(movieId)
+        }
+
+        return result?.toEntity()
+    }
 }

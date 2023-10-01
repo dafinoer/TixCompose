@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dafinrs.tixcompose.domain.usecases.GetApiToken
 import com.dafinrs.tixcompose.ui.pages.apikey.ApiKeyScreenPage
 import com.dafinrs.tixcompose.ui.pages.base.BaseScreenPage
-import com.dafinrs.tixcompose.ui.pages.detail.DetailScreenPage
+import com.dafinrs.tixcompose.ui.pages.detail.detailPage
 import com.dafinrs.tixcompose.ui.pages.locations.LocationScreenPage
 import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
 import com.dafinrs.tixcompose.utilities.NavigationPageKey
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
             TixComposeTheme {
                 val navController = rememberNavController()
                 NavHost(
-                    navController = navController, startDestination = startFirstUrl(isHaveApiToken)
+                    navController = navController, startDestination = startFirstUrl(isHaveApiToken),
                 ) {
                     composable(NavigationPageKey.API_KEY_PAGE) {
                         ApiKeyScreenPage {
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                             onTapLocation = {
                                 navController.navigate(NavigationPageKey.LOCATION_CHOICE_KEY_PAGE)
                             }) {
-                            navController.navigate(NavigationPageKey.DETAIL_MOVIE)
+                            navController.navigate("/detail/$it")
                         }
                     }
                     composable(NavigationPageKey.LOCATION_CHOICE_KEY_PAGE) {
@@ -49,10 +49,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    composable(NavigationPageKey.DETAIL_MOVIE) {
-                        DetailScreenPage {
-                            navController.popBackStack()
-                        }
+                    this.detailPage {
+                        navController.popBackStack()
                     }
                 }
             }

@@ -11,20 +11,57 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.dafinrs.tixcompose.R
-import com.dafinrs.tixcompose.ui.components.PosterImageComponent
+import com.dafinrs.tixcompose.data.repository.MovieRepository
+import com.dafinrs.tixcompose.presentations.detail.DetailMovieViewModel
+
+import com.dafinrs.tixcompose.presentations.detail.SuccessMovie
+
 import com.dafinrs.tixcompose.ui.components.PrimaryElevatedButton
-import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
+import com.dafinrs.tixcompose.ui.pages.notfound.NotFoundScreenPage
+import kotlinx.coroutines.Dispatchers
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
+import com.dafinrs.tixcompose.utilities.NavigationPageKey
+
+fun NavGraphBuilder.detailPage(onBackButton: () -> Unit) {
+    composable(NavigationPageKey.DETAIL_MOVIE) {
+        val movieIdArgument = it.arguments?.getString("movieId")
+        if (movieIdArgument != null) {
+            DetailScreenPage(movieId = movieIdArgument, onBackButton = onBackButton)
+        } else {
+            NotFoundScreenPage(messageInfo = "MovieId not Found")
+        }
+    }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreenPage(onBackButton: () -> Unit) {
+fun DetailScreenPage(
+    movieId: String,
+    movieRepository: MovieRepository = koinInject(parameters = {
+        parametersOf(Dispatchers.IO)
+    }),
+    onBackButton: () -> Unit,
+) {
     val backgroundPosterHeight = 250.dp
+    val detailMovieViewModel = koinViewModel<DetailMovieViewModel>(parameters = {
+        parametersOf(movieRepository, movieId.toInt())
+    })
+    val detailMovieState = detailMovieViewModel.detailMovieUiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key1 = Unit) {
+        detailMovieViewModel.getDetailMovie()
+    }
 
     Scaffold {
         Column(
@@ -39,69 +76,41 @@ fun DetailScreenPage(onBackButton: () -> Unit) {
                     Box {
                         BackdropImageComponent(
                             onPlayButton = { /*TODO*/ },
-                            imageUrl = "",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(backgroundPosterHeight)
+                                .height(backgroundPosterHeight),
+                            stateDetail = detailMovieState.value
                         )
-                        Column(
+                        ComponentMovieDetail(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(PaddingValues(top = 250.dp))
-                                .absolutePadding(left = 122.dp, right = 16.dp)
-                        ) {
-                            ComponentMovieDetail(
-                                titleMovie = "Lorem Ipsum",
-                                directorName = "Lorem",
-                            )
-                        }
-                        PosterImageComponent(
-                            imageUrl = "",
-                            modifier = Modifier
-                                .padding(top = 234.dp)
-                                .absolutePadding(left = 16.dp)
+                                .absolutePadding(left = 122.dp, right = 16.dp),
+                            detailMovieState = detailMovieState.value
                         )
+                        ComponentPosterMovieDetail(detailMovieState = detailMovieState.value)
                     }
                 }
                 item {
-                    ComponentRatingAndLike {
+                    ComponentRatingAndLike(detailMovieState = detailMovieState.value) {
 
                     }
                 }
 
                 item {
-                    CompoenentSynopsis("Lorem")
-                }
-
-                item {
-                    ComponentCast()
+                    ComponentSynopsis(detailMovieState.value)
                 }
             }
 
             PrimaryElevatedButton(
-                onAction = { /*TODO*/ }, title = stringResource(id = R.string.button_buy_now)
+                onAction = { /*TODO*/ },
+                title = stringResource(id = R.string.button_buy_now),
+                isEnable = when (detailMovieState.value) {
+                    is SuccessMovie -> true
+                    else -> false
+                }
             )
         }
 
-    }
-}
-
-@Preview
-@Composable
-fun PreviewScreenPage() {
-    TixComposeTheme {
-        DetailScreenPage {
-
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewDarkScreenPage() {
-    TixComposeTheme(darkTheme = true) {
-        DetailScreenPage {
-
-        }
     }
 }
