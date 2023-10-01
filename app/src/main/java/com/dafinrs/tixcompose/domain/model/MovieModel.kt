@@ -13,4 +13,6 @@ data class MovieModel(
     val backdropPath: String? = null,
     val cinemaList: Map<String, CinemasModel> = emptyMap(),
     val postPath: String? = null,
+    val genres: List<String> = emptyList(),
+    val genreCompact: String? = null,
 )

@@ -16,9 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,32 +23,44 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dafinrs.tixcompose.R
-import kotlin.math.roundToInt
+import com.dafinrs.tixcompose.presentations.detail.DetailMovieState
+import com.dafinrs.tixcompose.presentations.detail.SuccessMovie
 
 
 @Composable
-fun ComponentRatingAndLike(isWatchList: Boolean = false, onActionLikeButton: () -> Unit) {
-    Column(modifier = Modifier.padding(vertical = 32.dp)) {
-        Divider(
-            thickness = 2.dp, color = MaterialTheme.colorScheme.surfaceVariant
-        )
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(vertical = 16.dp)
-                .fillMaxWidth()
-        ) {
-            RatingBarInfo()
+fun ComponentRatingAndLike(
+    isWatchList: Boolean = false, detailMovieState: DetailMovieState, onActionLikeButton: () -> Unit
+) {
 
-            LikeInfo(isWatchList = isWatchList) {
-                onActionLikeButton()
+    when (detailMovieState) {
+        is SuccessMovie -> Column(modifier = Modifier.padding(vertical = 32.dp)) {
+            Divider(
+                thickness = 2.dp, color = MaterialTheme.colorScheme.surfaceVariant
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                RatingBarInfo(
+                    detailMovieState.movieModel.voteCount,
+                    rateAverage = detailMovieState.movieModel.votes
+                )
+
+                LikeInfo(isWatchList = isWatchList) {
+                    onActionLikeButton()
+                }
             }
+            Divider(
+                thickness = 8.dp, color = MaterialTheme.colorScheme.surfaceVariant
+            )
         }
-        Divider(
-            thickness = 8.dp, color = MaterialTheme.colorScheme.surfaceVariant
-        )
+
+        else -> Unit
     }
+
 }
 
 
@@ -60,9 +69,7 @@ internal fun RatingBarInfo(
     totalVote: Int = 0,
     rateAverage: Double = 0.0,
 ) {
-    val ratingAverage by remember {
-        derivedStateOf { (rateAverage / 2).roundToInt() }
-    }
+    val ratingAverage = (rateAverage / 2).toInt()
 
     Column {
         Row(
@@ -71,7 +78,7 @@ internal fun RatingBarInfo(
         ) {
             Text(
                 modifier = Modifier.absolutePadding(right = 4.dp),
-                text = "9.0",
+                text = "%.1f".format(rateAverage),
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 color = colorResource(id = R.color.yellow_light)
             )

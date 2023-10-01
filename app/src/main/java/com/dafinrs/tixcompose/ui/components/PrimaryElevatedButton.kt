@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.dafinrs.tixcompose.ui.theme.TixComposeTheme
 
 @Composable
-fun PrimaryElevatedButton(onAction: () -> Unit, title: String) {
+fun PrimaryElevatedButton(onAction: () -> Unit, title: String, isEnable: Boolean = false) {
     ElevatedButton(
         onClick = onAction,
         colors = ButtonDefaults.elevatedButtonColors(
@@ -26,6 +26,7 @@ fun PrimaryElevatedButton(onAction: () -> Unit, title: String) {
             disabledContentColor = MaterialTheme.colorScheme.onSurface,
         ),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
+        enabled = isEnable
     ) {
         Text(
             text = title,
