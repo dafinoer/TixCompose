@@ -1,7 +1,6 @@
 package com.dafinrs.tixcompose.ui.pages.home.movie
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
@@ -24,11 +22,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.dafinrs.tixcompose.R
 import com.dafinrs.tixcompose.domain.model.MovieModel
@@ -39,11 +39,13 @@ import kotlinx.coroutines.Dispatchers
 @Composable
 fun MovieSlider(
     movies: List<MovieModel>,
-    paddingSize: () -> Double,
     onChangeMovie: (MovieModel) -> Unit,
     onTapBuyButton: (MovieModel) -> Unit,
     onTapDetailMovie: (Int) -> Unit,
 ) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.let {
+        it * 0.25
+    }
     val pagerState = rememberPagerState(pageCount = {
         Int.MAX_VALUE
     }, initialPage = (Int.MAX_VALUE / 2) - (Math.floorMod(Int.MAX_VALUE / 2, movies.size)))
@@ -53,7 +55,7 @@ fun MovieSlider(
     }
 
     LaunchedEffect(movies) {
-        snapshotFlow { pagerState.currentPage }.collect {
+        snapshotFlow { pagerState.settledPage }.collect {
             indexButtonShow = Math.floorMod(it, movies.size)
             onChangeMovie(movies[indexButtonShow])
         }
@@ -62,10 +64,9 @@ fun MovieSlider(
     HorizontalPager(
         state = pagerState,
         contentPadding = PaddingValues(
-            start = paddingSize().dp,
-            end = paddingSize().dp,
+            start = screenWidth.dp,
+            end = screenWidth.dp,
         ),
-        pageSize = PageSize.Fill,
         pageSpacing = 16.dp,
         modifier = Modifier.padding(vertical = 16.dp),
     ) {
@@ -83,29 +84,27 @@ fun MovieSlider(
 
 @Composable
 private fun ImageItem(
-    modifier: Modifier = Modifier, movieModel: MovieModel,
+    movieModel: MovieModel,
     isShowButtonBuyTicket: Boolean = false,
     onTapBuyButton: (MovieModel) -> Unit,
     onTapDetailMovie: (Int) -> Unit,
 ) {
     Surface(
-        modifier = modifier
+        modifier = Modifier
             .clickable { onTapDetailMovie(movieModel.id) }
             .fillMaxWidth()
             .height(392.dp),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        val painter = rememberAsyncImagePainter(
+        AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(movieModel.postPath?.toFullPosterW300Url()).crossfade(true)
                 .dispatcher(Dispatchers.IO).build(),
-        )
-        Image(
             modifier = Modifier.fillMaxSize(),
-            painter = painter,
             contentDescription = stringResource(id = R.string.banner_image_home),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
+            filterQuality = FilterQuality.Low,
         )
         if (isShowButtonBuyTicket) {
             Box(

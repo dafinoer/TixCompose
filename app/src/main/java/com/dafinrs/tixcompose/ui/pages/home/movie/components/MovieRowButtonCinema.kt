@@ -14,7 +14,11 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -24,8 +28,15 @@ import com.dafinrs.tixcompose.domain.model.CinemasModel
 
 
 @Composable
-fun MovieRowButtonCinema(cinemaName: String? = null, onTapButton: (String?) -> Unit) {
+fun MovieRowButtonCinema(
+    onDisableChangeCinema: () -> Boolean,
+    onTapButton: (String?) -> Unit,
+) {
     val cinemas = itemsCompose()
+    var userChoiceCinema by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -35,22 +46,28 @@ fun MovieRowButtonCinema(cinemaName: String? = null, onTapButton: (String?) -> U
         item {
             CardItem(
                 onTapAction = {
-                    onTapButton(null)
+                    if (!onDisableChangeCinema()) {
+                        userChoiceCinema = null
+                        onTapButton(null)
+                    }
                 },
                 textName = "All",
                 modifier = Modifier.padding(4.dp),
-                isActive = cinemaName == null
+                isActive = userChoiceCinema == null
             )
         }
 
         items(cinemas.size) {
             CardItem(
                 onTapAction = {
-                    onTapButton(cinemas[it].typeName)
+                    if (!onDisableChangeCinema()) {
+                        userChoiceCinema = cinemas[it].typeName
+                        onTapButton(cinemas[it].typeName)
+                    }
                 },
                 textName = cinemas[it].originalName,
                 modifier = Modifier.padding(4.dp),
-                isActive = cinemaName.equals(cinemas[it].typeName)
+                isActive = userChoiceCinema.equals(cinemas[it].typeName)
             )
         }
     }
