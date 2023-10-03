@@ -9,21 +9,20 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dafinrs.tixcompose.presentations.cinemalocation.CinemaLocationViewModel
-import com.dafinrs.tixcompose.presentations.nowplaying.NowPlayingState
+import com.dafinrs.tixcompose.presentations.nowplaying.InitialNowPlaying
+import com.dafinrs.tixcompose.presentations.nowplaying.LoadingNowPlayingMovie
 import com.dafinrs.tixcompose.presentations.nowplaying.NowPlayingViewModel
+import com.dafinrs.tixcompose.presentations.nowplaying.SuccessNowPlayingMovie
 import com.dafinrs.tixcompose.ui.pages.home.location.LocationCinema
 import com.dafinrs.tixcompose.ui.pages.home.movie.MovieContent
 import com.dafinrs.tixcompose.ui.pages.home.movie.MovieContentHeading
+import com.dafinrs.tixcompose.ui.pages.home.movie.MovieRowButtonCinema
 import com.dafinrs.tixcompose.ui.pages.home.slider.SliderHomeApp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,12 +37,10 @@ fun HomeScreenPage(
     val nowPlayingMovieState = nowPlayingViewModel.nowPlayingUIState.collectAsStateWithLifecycle()
     val cinemaLocationState =
         cinemaLocationViewModel.getLocationUserFlow.collectAsStateWithLifecycle()
-    var userChoiceCinema by rememberSaveable {
-        mutableStateOf<String?>(null)
-    }
-    SideEffect {
+
+    LaunchedEffect(key1 = Unit) {
         when (nowPlayingMovieState.value) {
-            is NowPlayingState.Initial -> nowPlayingViewModel.onCallNowPlayingPage(1)
+            is InitialNowPlaying -> nowPlayingViewModel.onCallNowPlayingPage(1)
             else -> Unit
         }
     }
@@ -62,9 +59,26 @@ fun HomeScreenPage(
             item {
                 MovieContentHeading(onTapAllMovie = onMoreMovie)
             }
+
+            item {
+                MovieRowButtonCinema(
+                    onDisableChangeCinema = {
+                        when (nowPlayingMovieState.value) {
+                            is SuccessNowPlayingMovie -> false
+                            else -> true
+                        }
+                    },
+                ) { cinemaName ->
+                    if (cinemaName != null) {
+                        nowPlayingViewModel.getPlayNowMovieWithFilter(cinemaName)
+                    } else {
+                        nowPlayingViewModel.onCallNowPlayingPage(1)
+                    }
+                }
+            }
             item {
                 when (val state = nowPlayingMovieState.value) {
-                    is NowPlayingState.Loading -> {
+                    is LoadingNowPlayingMovie -> {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -75,18 +89,9 @@ fun HomeScreenPage(
                         }
                     }
 
-                    is NowPlayingState.Success -> {
+                    is SuccessNowPlayingMovie -> {
                         MovieContent(
                             moviesItem = state.items,
-                            useChoiceCinema = userChoiceCinema,
-                            onChangeCinema = { cinemaType ->
-                                userChoiceCinema = cinemaType
-                                if (cinemaType != null) {
-                                    nowPlayingViewModel.getPlayNowMovieWithFilter(cinemaType)
-                                } else {
-                                    nowPlayingViewModel.onCallNowPlayingPage(1)
-                                }
-                            },
                         ) {
                             onDetail(it)
                         }

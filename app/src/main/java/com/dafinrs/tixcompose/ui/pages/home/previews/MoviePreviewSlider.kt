@@ -7,7 +7,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import com.dafinrs.tixcompose.domain.model.MovieModel
 import com.dafinrs.tixcompose.ui.pages.home.movie.MovieSlider
@@ -31,25 +30,16 @@ fun MoviePreviewSlider() {
 
     TixComposeTheme {
         Scaffold {
-            val screenWidth = LocalConfiguration.current.screenWidthDp
-
             Column(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxWidth()
             ) {
-                MovieSlider(
-                    movies = items,
-                    paddingSize = {
-                        screenWidth * 0.25
-                    },
-                    onChangeMovie = {
+                MovieSlider(movies = emptyList(), onChangeMovie = {
 
-                    },
-                    onTapBuyButton = {
+                }, onTapBuyButton = {
 
-                    }
-                ) {
+                }) {
 
                 }
             }
