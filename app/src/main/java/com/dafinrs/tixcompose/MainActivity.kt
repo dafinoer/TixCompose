@@ -38,9 +38,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        splash.setKeepOnScreenCondition {
-            isHaveToken == null
-        }
+        splash.setKeepOnScreenCondition { isHaveToken == null }
 
         setContent {
             TixComposeTheme {
