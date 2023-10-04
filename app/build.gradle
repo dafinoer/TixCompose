@@ -134,6 +134,8 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.7")
     testImplementation "io.mockk:mockk-android:1.13.7"
     testImplementation "io.mockk:mockk-agent:1.13.7"
+
+    implementation "androidx.core:core-splashscreen:1.0.1"
 }
 
 protobuf {
