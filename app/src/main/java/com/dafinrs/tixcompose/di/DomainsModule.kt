@@ -15,7 +15,6 @@ import com.dafinrs.tixcompose.domain.usecases.SaveLocationUser
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.annotation.Factory
-import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.Module
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.get
@@ -34,74 +33,46 @@ class DomainsModule {
     fun saveApiKeyUseCase() = SaveApiKey(
         get(
             clazz = SettingRepository::class.java,
+            parameters = { parametersOf(Dispatchers.IO) },
+        )
+    )
+
+    @Factory
+    fun nowPlayingUseCase() = GetNowPlayingUseCase(
+        get(
+            clazz = MovieRepository::class.java,
+            parameters = { parametersOf(Dispatchers.IO) },
+        ), get(
+            clazz = CinemasRepository::class.java,
             parameters = {
-                parametersOf(
-                    get(clazz = CoroutineDispatcher::class.java,
-                        parameters = { parametersOf(Dispatchers.IO) })
-                )
+                parametersOf(Dispatchers.IO)
             },
         )
     )
 
     @Factory
-    fun nowPlayingUseCase(@InjectedParam dispatcher: CoroutineDispatcher) = GetNowPlayingUseCase(
+    fun getListLocationCinema(): GetListLocationCinema = GetListLocationCinema(
         get(
-            clazz = MovieRepository::class.java,
-            parameters = {
-                parametersOf(
-                    get(clazz = CoroutineDispatcher::class.java,
-                        parameters = { parametersOf(dispatcher) })
-                )
-            },
-        ), get(clazz = CinemasRepository::class.java, parameters = {
+            clazz = CinemasRepository::class.java,
+            parameters = { parametersOf(Dispatchers.IO) },
+        )
+    )
+
+    @Factory
+    fun getLocationUser() = GetLocationUser(
+        get(clazz = CinemasRepository::class.java, parameters = {
             parametersOf(
-                get(
-                    clazz = CoroutineDispatcher::class.java,
-                    parameters = {
-                        parametersOf(dispatcher)
-                    },
-                )
+                get(clazz = CoroutineDispatcher::class.java,
+                    parameters = { parametersOf(Dispatchers.IO) })
             )
         })
     )
 
     @Factory
-    fun getListLocationCinema(@InjectedParam dispatcher: CoroutineDispatcher): GetListLocationCinema =
-        GetListLocationCinema(
-            get(
-                clazz = CinemasRepository::class.java,
-                parameters = {
-                    parametersOf(
-                        get(
-                            clazz = CoroutineDispatcher::class.java,
-                            parameters = {
-                                parametersOf(dispatcher)
-                            },
-                        )
-                    )
-                },
-            )
-        )
-
-    @Factory
-    fun getLocationUser() =
-        GetLocationUser(get(clazz = CinemasRepository::class.java, parameters = {
-            parametersOf(
-                get(clazz = CoroutineDispatcher::class.java,
-                    parameters = { parametersOf(Dispatchers.IO) })
-            )
-        }))
-
-    @Factory
     fun saveLocationUser() = SaveLocationUser(
         get(
             clazz = CinemasRepository::class.java,
-            parameters = {
-                parametersOf(
-                    get(clazz = CoroutineDispatcher::class.java,
-                        parameters = { parametersOf(Dispatchers.IO) })
-                )
-            },
+            parameters = { parametersOf(Dispatchers.IO) },
         )
     )
 
