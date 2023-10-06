@@ -55,12 +55,16 @@ fun DetailScreenPage(
 ) {
     val backgroundPosterHeight = 250.dp
     val detailMovieViewModel = koinViewModel<DetailMovieViewModel>(parameters = {
-        parametersOf(movieRepository, movieId.toInt())
+        parametersOf(
+            movieRepository, movieId.toInt()
+        )
     })
     val detailMovieState = detailMovieViewModel.detailMovieUiState.collectAsStateWithLifecycle()
+    val favMovieState = detailMovieViewModel.favoriteMovieStatusUI.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) {
         detailMovieViewModel.getDetailMovie()
+        detailMovieViewModel.onReadFav()
     }
 
     Scaffold {
@@ -92,8 +96,10 @@ fun DetailScreenPage(
                     }
                 }
                 item {
-                    ComponentRatingAndLike(detailMovieState = detailMovieState.value) {
-
+                    ComponentRatingAndLike(
+                        detailMovieState = detailMovieState.value, isWatchList = favMovieState.value
+                    ) {
+                        detailMovieViewModel.onFavMovie(it)
                     }
                 }
 
