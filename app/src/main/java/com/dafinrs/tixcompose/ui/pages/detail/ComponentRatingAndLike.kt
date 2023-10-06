@@ -23,15 +23,17 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dafinrs.tixcompose.R
+import com.dafinrs.tixcompose.domain.model.MovieModel
 import com.dafinrs.tixcompose.presentations.detail.DetailMovieState
 import com.dafinrs.tixcompose.presentations.detail.SuccessMovie
 
 
 @Composable
 fun ComponentRatingAndLike(
-    isWatchList: Boolean = false, detailMovieState: DetailMovieState, onActionLikeButton: () -> Unit
+    isWatchList: Boolean = false,
+    detailMovieState: DetailMovieState,
+    onActionLikeButton: (MovieModel) -> Unit
 ) {
-
     when (detailMovieState) {
         is SuccessMovie -> Column(modifier = Modifier.padding(vertical = 32.dp)) {
             Divider(
@@ -50,7 +52,7 @@ fun ComponentRatingAndLike(
                 )
 
                 LikeInfo(isWatchList = isWatchList) {
-                    onActionLikeButton()
+                    onActionLikeButton(detailMovieState.movieModel)
                 }
             }
             Divider(
