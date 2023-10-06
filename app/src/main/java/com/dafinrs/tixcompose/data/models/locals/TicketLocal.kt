@@ -14,20 +14,18 @@ data class TicketLocal(
     @PrimaryKey(autoGenerate = true) val uid: Int,
     val movieId: Int,
     val title: String,
-    val desc: String,
     @ColumnInfo(name = "image_url") val imageUrl: String,
     @ColumnInfo(name = "total_qty") val totalQty: Int = 0,
     @ColumnInfo(name = "movie_date") val date: Date?,
     @ColumnInfo(name = "status_ticket") val statusTicket: StatusTicketLocal?,
     val createdAt: Date,
+    val totalPrice: Long = 0,
 )
 
 fun TicketModel.toTicketLocal() = TicketLocal(
     uid = ticketId,
     movieId = movieId,
     title = title,
-    desc = desc,
-    imageUrl = imageUrl,
     totalQty = totalQty,
     date = movieDate?.toDate(),
     statusTicket = when (ticketStatus) {
@@ -37,14 +35,14 @@ fun TicketModel.toTicketLocal() = TicketLocal(
         else -> null
     },
     createdAt = createdTicketDate.toDate(),
+    totalPrice = totalPrice,
+    imageUrl = imageUrl,
 )
 
 fun TicketLocal.toEntity() = TicketModel(
     ticketId = uid,
     movieId = movieId,
     title = title,
-    desc = desc,
-    imageUrl = imageUrl,
     totalQty = totalQty,
     ticketStatus = when (statusTicket) {
         StatusTicketLocal.WAITING -> TicketStatusModel.WAITING
@@ -53,5 +51,7 @@ fun TicketLocal.toEntity() = TicketModel(
         else -> null
     },
     movieDate = date?.toZoneDateTime(),
-    createdTicketDate = createdAt.toZoneDateTime()
+    createdTicketDate = createdAt.toZoneDateTime(),
+    totalPrice = totalPrice,
+    imageUrl = imageUrl,
 )
