@@ -23,6 +23,6 @@ class TicketRepositoryImpl(private val ticketDao: TicketDao) : TicketRepository 
         }
 
     override suspend fun buyTicket(ticket: TicketModel) {
-        ticketDao.insertMovie(ticket.toTicketLocal())
+        ticketDao.insertTicket(ticket.toTicketLocal())
     }
 }

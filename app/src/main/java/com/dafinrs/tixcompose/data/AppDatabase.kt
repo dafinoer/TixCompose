@@ -4,9 +4,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
-import com.dafinrs.tixcompose.data.local.MovieDao
+import com.dafinrs.tixcompose.data.local.FavMovieDao
 import com.dafinrs.tixcompose.data.local.TicketDao
-import com.dafinrs.tixcompose.data.models.locals.MovieLocal
+import com.dafinrs.tixcompose.data.models.locals.FavMovieLocal
 import com.dafinrs.tixcompose.data.models.locals.StatusTicketLocal
 import com.dafinrs.tixcompose.data.models.locals.TicketLocal
 import java.util.Date
@@ -36,10 +36,10 @@ class Converters {
     }
 }
 
-@Database(entities = [TicketLocal::class, MovieLocal::class], version = 1)
+@Database(entities = [TicketLocal::class, FavMovieLocal::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun ticketDao(): TicketDao
-    abstract fun movieDao(): MovieDao
+    abstract fun movieDao(): FavMovieDao
 }
 

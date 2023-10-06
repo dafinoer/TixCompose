@@ -1,7 +1,4 @@
-
-
 # Tix Clone App
-
 
 ### Packages
 
@@ -13,3 +10,14 @@
 - Kotlin Coroutine
 - Koin
 - KSP
+- Room
+
+### Feature
+
+- [x] Home
+- [x] Detail
+- [] Favorite Movie
+- [] Search
+- [] Buy Ticket
+- [] Profile
+- [x] Apikey Login

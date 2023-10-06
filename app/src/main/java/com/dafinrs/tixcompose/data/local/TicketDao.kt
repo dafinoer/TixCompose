@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface TicketDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertMovie(vararg movieLocal: TicketLocal)
+    suspend fun insertTicket(vararg movieLocal: TicketLocal)
 
     @Query("SELECT * FROM ticket WHERE status_ticket = :statusTicketLocal")
     fun streamStatusTicket(statusTicketLocal: StatusTicketLocal): Flow<List<TicketLocal>>
