@@ -44,7 +44,7 @@ fun LocationCinema(
             tint = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = locationName?: stringResource(id = R.string.cinemas_location),
+            text = locationName ?: stringResource(id = R.string.cinemas_location),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(horizontal = 8.dp),
             maxLines = 1,
@@ -64,7 +64,7 @@ fun LocationCinema(
 @Composable
 fun PreviewChangeLocation() {
     TixComposeTheme {
-        LocationCinema {
+        LocationCinema(locationName = "Tangerang") {
 
         }
     }
@@ -74,7 +74,7 @@ fun PreviewChangeLocation() {
 @Composable
 fun PreviewChangeLocationDark() {
     TixComposeTheme(darkTheme = true) {
-        LocationCinema {
+        LocationCinema(locationName = "Tangerang") {
 
         }
     }

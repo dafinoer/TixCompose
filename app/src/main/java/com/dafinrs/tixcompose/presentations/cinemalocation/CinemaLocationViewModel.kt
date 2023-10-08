@@ -7,20 +7,26 @@ import com.dafinrs.tixcompose.domain.model.LocationModel
 import com.dafinrs.tixcompose.domain.usecases.GetListLocationCinema
 import com.dafinrs.tixcompose.domain.usecases.GetLocationUser
 import com.dafinrs.tixcompose.domain.usecases.SaveLocationUser
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
-import org.koin.core.annotation.InjectedParam
 
 @KoinViewModel
 class CinemaLocationViewModel(
-    @InjectedParam private val getListLocationCinema: GetListLocationCinema,
+    private val getListLocationCinema: GetListLocationCinema,
     getLocationUser: GetLocationUser,
     private val saveLocationUser: SaveLocationUser,
 ) : ViewModel() {
+    private val saveStateLocation = MutableStateFlow<CinemaLocationsState>(
+        CinemaLocationsState.Idle
+    )
+    val saveStateLocationUI = saveStateLocation.asStateFlow()
+
     val locationUiState = flow {
         emit(CinemaLocationsState.Loading)
         val locations = getListLocationCinema.getLocations()
@@ -34,17 +40,21 @@ class CinemaLocationViewModel(
         started = SharingStarted.WhileSubscribed(5000)
     )
 
-    val getLocationUserFlow = getLocationUser.readLocation().catch {
-        Log.e("CinemaLocationViewModel", it.message ?: "", it)
-    }.stateIn(
+    val getLocationUserFlow = getLocationUser.readLocation().stateIn(
         viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = null
+        SharingStarted.WhileSubscribed(5000),
+        null,
     )
 
     fun saveLocation(locationModel: LocationModel) {
         viewModelScope.launch {
-            saveLocationUser.saveLocation(locationModel)
+            try {
+                saveStateLocation.value = CinemaLocationsState.Loading
+                saveLocationUser.saveLocation(locationModel)
+                saveStateLocation.value = CinemaLocationsState.SaveSuccess
+            } catch (error: Exception) {
+                saveStateLocation.value = CinemaLocationsState.Error
+            }
         }
     }
 }

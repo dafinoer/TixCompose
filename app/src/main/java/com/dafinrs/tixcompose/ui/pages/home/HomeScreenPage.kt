@@ -36,7 +36,7 @@ fun HomeScreenPage(
 ) {
     val nowPlayingMovieState = nowPlayingViewModel.nowPlayingUIState.collectAsStateWithLifecycle()
     val cinemaLocationState =
-        cinemaLocationViewModel.getLocationUserFlow.collectAsStateWithLifecycle()
+        cinemaLocationViewModel.getLocationUserFlow.collectAsStateWithLifecycle(initialValue = null)
 
     LaunchedEffect(key1 = Unit) {
         when (nowPlayingMovieState.value) {
