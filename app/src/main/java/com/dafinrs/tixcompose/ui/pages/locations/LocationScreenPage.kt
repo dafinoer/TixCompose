@@ -28,60 +28,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dafinrs.tixcompose.R
-import com.dafinrs.tixcompose.domain.usecases.GetListLocationCinema
+import com.dafinrs.tixcompose.domain.model.LocationModel
 import com.dafinrs.tixcompose.presentations.cinemalocation.CinemaLocationViewModel
 import com.dafinrs.tixcompose.presentations.cinemalocation.CinemaLocationsState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
-import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent.get
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationScreenPage(
     modifier: Modifier = Modifier,
-    cinemaLocationViewModel: CinemaLocationViewModel = koinInject(
-        parameters = {
-            parametersOf(
-                get(clazz = GetListLocationCinema::class.java, parameters = {
-                    parametersOf(Dispatchers.IO)
-                }),
-            )
-        },
-    ),
+    cinemaLocationViewModel: CinemaLocationViewModel = koinViewModel(),
     onBackNavigation: () -> Unit,
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    var showDialogEnableGPS by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
+    val snackBarMessageNoLocationData = stringResource(id = R.string.snackbar_error_nodata_location)
     val rememberController = rememberLocationUser()
     val locationsState = cinemaLocationViewModel.locationUiState.collectAsStateWithLifecycle(
         initialValue = CinemaLocationsState.Loading
     )
-    val snackbarMessageNoLocationData = stringResource(id = R.string.snackbar_error_nodata_location)
+    val saveStateLocation =
+        cinemaLocationViewModel.saveStateLocationUI.collectAsStateWithLifecycle()
 
-    LaunchedEffect(rememberController.permissionState.value) {
-        when (val state = rememberController.permissionState.value) {
-            is PermissionLocationUserState.Success -> {
-                if (state.location != null) {
-                    cinemaLocationViewModel.saveLocation(state.location)
-                    onBackNavigation()
-                } else {
-                    snackbarHostState.showSnackbar(snackbarMessageNoLocationData)
-                }
-            }
+    LocationSettingPermission(rememberController.permissionState.value, onDisablePermission = {
+        snackBarHostState.showSnackbar(snackBarMessageNoLocationData)
+    }) {
+        cinemaLocationViewModel.saveLocation(it)
+    }
 
-            is PermissionLocationUserState.DisableGPS -> showDialogEnableGPS = true
+    LaunchedEffect(saveStateLocation.value) {
+        when (saveStateLocation.value) {
+            is CinemaLocationsState.SaveSuccess -> onBackNavigation()
             else -> Unit
         }
     }
 
-    AlertDialogLocation(showDialogEnableGPS) { showDialogEnableGPS = false }
-
     Scaffold(snackbarHost = {
-        SnackbarHost(snackbarHostState)
+        SnackbarHost(snackBarHostState)
     }, topBar = {
         TopAppBar(
             navigationIcon = {
@@ -97,6 +81,8 @@ fun LocationScreenPage(
             },
         )
     }) {
+        val coroutineScope = rememberCoroutineScope()
+
         LazyColumn(modifier = modifier.padding(it)) {
             when (val state = locationsState.value) {
                 is CinemaLocationsState.Success -> {
@@ -125,4 +111,30 @@ fun LocationScreenPage(
             }
         }
     }
+}
+
+@Composable
+private fun LocationSettingPermission(
+    permissionLocationUserState: PermissionLocationUserState,
+    onDisablePermission: suspend () -> Unit,
+    onPermissionGranted: (LocationModel) -> Unit
+) {
+    var showDialogEnableGPS by remember { mutableStateOf(false) }
+
+    LaunchedEffect(permissionLocationUserState) {
+        when (permissionLocationUserState) {
+            is PermissionLocationUserState.Success -> {
+                if (permissionLocationUserState.location != null) {
+                    onPermissionGranted(permissionLocationUserState.location)
+                } else {
+                    onDisablePermission()
+                }
+            }
+
+            is PermissionLocationUserState.DisableGPS -> showDialogEnableGPS = true
+            else -> Unit
+        }
+    }
+
+    AlertDialogLocation(showDialogEnableGPS) { showDialogEnableGPS = false }
 }
